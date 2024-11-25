@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Job;
 use Illuminate\Http\Request;
 
+use function Laravel\Prompts\search;
+
 class JobController extends Controller
 {
     /**
@@ -12,7 +14,11 @@ class JobController extends Controller
      */
     public function index()
     {
-        return view('job.index', ['jobs'=> Job::all()]);
+        $jobs = Job::query();
+        $jobs->when(request('search'), function($query){
+            $query->where('title','like','%'.request('search').'%')->orWhere('description','like','%'.request('search').'%');
+        });
+        return view('job.index', ['jobs'=> $jobs->get()]);
     }
 
     /**
