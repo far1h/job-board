@@ -2,48 +2,50 @@
     class="relative"
     x-data="{
         suggestions: [],
-        query: '{{ $value ?? '' }}', // Keeps the initial value
+        query: '{{ $value ?? '' }}',
         showSuggestions: false,
         loading: false,
         activeRequest: null,
         debounceTimer: null,
-        fetchSuggestions(fieldName) {
+        async fetchSuggestions(fieldName) {
             clearTimeout(this.debounceTimer);
             this.loading = true;
             const currentQuery = this.query;
 
-            this.debounceTimer = setTimeout(() => {
-                if (this.activeRequest) {
-                    this.activeRequest.abort();
+            this.debounceTimer = setTimeout(async () => {
+                try {
+                    if (this.activeRequest) {
+                        this.activeRequest.abort();
+                    }
+
+                    const controller = new AbortController();
+                    this.activeRequest = controller;
+
+                    const response = await fetch(
+                        `${window.location.origin}/api/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`,
+                        { signal: controller.signal }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+
+                    // Ensure suggestions are updated only for the latest query
+                    if (currentQuery === this.query) {
+                        this.suggestions = data;
+                    }
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        console.error('Error fetching suggestions:', error);
+                    }
+                } finally {
+                    // Stop loading spinner for the latest query
+                    if (currentQuery === this.query) {
+                        this.loading = false;
+                    }
                 }
-
-                const controller = new AbortController();
-                this.activeRequest = controller;
-
-                fetch(`${window.location.origin}/api/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`, {
-                    signal: controller.signal,
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (currentQuery === this.query) {
-                            this.suggestions = data;
-                        }
-                    })
-                    .catch(error => {
-                        if (error.name !== 'AbortError') {
-                            console.error('Error fetching suggestions:', error);
-                        }
-                    })
-                    .finally(() => {
-                        if (currentQuery === this.query) {
-                            this.loading = false;
-                        }
-                    });
             }, 300); // Debounce delay
         },
     }"
