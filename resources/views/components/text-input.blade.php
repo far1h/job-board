@@ -20,7 +20,7 @@
                 const controller = new AbortController();
                 this.activeRequest = controller;
 
-                fetch(`/api/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`, {
+                fetch(`${window.location.origin}/api/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`, {
                     signal: controller.signal,
                 })
                     .then(response => {
