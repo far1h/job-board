@@ -2,7 +2,7 @@
     class="relative"
     x-data="{
         suggestions: [],
-        query: '',
+        query: '{{ $value ?? '' }}', // Keeps the initial value
         showSuggestions: false,
         loading: false,
         activeRequest: null,
@@ -46,12 +46,6 @@
                     });
             }, 300); // Debounce delay
         },
-        clearInput() {
-            this.query = '';
-            this.suggestions = [];
-            this.loading = false;
-            this.showSuggestions = false;
-        }
     }"
     @click.away="showSuggestions = false"
 >
@@ -60,8 +54,6 @@
         type="text"
         placeholder="{{ $placeholder }}"
         name="{{ $name }}"
-        value="{{ $value }}"
-        id="{{ $name }}"
         x-model="query"
         @input="fetchSuggestions('{{ $name }}')"
         @focus="showSuggestions = true"
@@ -72,7 +64,7 @@
     <button
         type="button"
         class="absolute top-0 right-2 flex h-full items-center"
-        @click="clearInput"
+        @click="query = ''; suggestions = [];"
         x-show="query.length > 0"
     >
         <svg
