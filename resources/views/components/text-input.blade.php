@@ -22,7 +22,7 @@
                     this.activeRequest = controller;
 
                     const response = await fetch(
-                        `${window.location.origin}/api/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`,
+                        `${window.location.origin}/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`,
                         { signal: controller.signal }
                     );
 
