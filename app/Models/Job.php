@@ -16,6 +16,9 @@ class Job extends Model
         'IT','Finance','Sales','Marketing'
     ];
 
+    public function employer(){
+        return $this->belongsTo(Employer::class);
+    }
     public function scopeFilter($query, array $filters)
     {
         return $query->when($filters['search'] ?? null, function ($query, $search) {
