@@ -14,8 +14,18 @@ class JobController extends Controller
      */
     public function index()
     {
-        $filters = request()->only('search', 'min_salary', 'experience', 'category');
-        return view('job.index', ['jobs' => Job::with('employer')->filter($filters)->get()]);
+        $filters = request()->only(
+            'search',
+            'min_salary',
+            'max_salary',
+            'experience',
+            'category'
+        );
+
+        return view(
+            'job.index',
+            ['jobs' => Job::with('employer')->filter($filters)->get()]
+        );
     }
 
     public function suggestions(Request $request)
@@ -28,7 +38,13 @@ class JobController extends Controller
         }
 
         // Validate field to avoid SQL injection risks
-        if (!in_array($field, ['search', 'min_salary', 'max_salary'])) {
+        if (!in_array($field, [
+            'search',
+            'min_salary',
+            'max_salary',
+            'experience',
+            'category'
+        ])) {
             return response()->json([]);
         }
 
