@@ -14,11 +14,12 @@ class JobController extends Controller
      */
     public function index()
     {
-        $filters = request()->only('search', 'min_salary','experience','category');
-        return view('job.index', ['jobs'=> Job::filter($filters)->get()]);
+        $filters = request()->only('search', 'min_salary', 'experience', 'category');
+        return view('job.index', ['jobs' => Job::with('employer')->filter($filters)->get()]);
     }
 
-    public function suggestions(Request $request) {
+    public function suggestions(Request $request)
+    {
         $field = $request->input('field');
         $query = $request->input('query');
 
@@ -66,7 +67,7 @@ class JobController extends Controller
      */
     public function show(Job $job)
     {
-        return view('job.show', compact('job'));
+        return view('job.show', ['job' => $job->load('employer')]);
     }
 
     /**
