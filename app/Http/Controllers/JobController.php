@@ -32,19 +32,21 @@ class JobController extends Controller
             return response()->json([]);
         }
 
-        $suggestions = Job::query()
-            ->when($field === 'search', function ($queryBuilder) use ($query) {
-                $queryBuilder->where('title', 'like', '%' . $query . '%')
-                    ->orWhere('description', 'like', '%' . $query . '%');
-            })
-            ->when($field === 'min_salary' || $field === 'max_salary', function ($queryBuilder) use ($query) {
-                $queryBuilder->where('salary', 'like', '%' . $query . '%');
-            })
+        // Use the filter scope for consistent filtering logic
+        $filters = [
+            'search' => $field === 'search' ? $query : null,
+            'min_salary' => $field === 'min_salary' ? $query : null,
+            'max_salary' => $field === 'max_salary' ? $query : null,
+        ];
+
+        $suggestions = Job::with('employer')
+            ->filter($filters)
             ->limit(10)
             ->get(['id', $field === 'search' ? 'title as text' : 'salary as text']);
 
         return response()->json($suggestions);
     }
+
 
     /**
      * Show the form for creating a new resource.
