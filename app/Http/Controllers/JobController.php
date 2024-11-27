@@ -38,25 +38,18 @@ class JobController extends Controller
         }
 
         // Validate field to avoid SQL injection risks
-        if (!in_array($field, [
-            'search',
-            'min_salary',
-            'max_salary',
-        ])) {
+        if (!in_array($field, ['search', 'min_salary', 'max_salary'])) {
             return response()->json([]);
         }
 
-        // Use the filter scope for consistent filtering logic
+        // Define filters for the scopeFilter
         $filters = [
             'search' => $field === 'search' ? $query : null,
-            'min_salary' => $field === 'min_salary' ? $query : null,
-            'max_salary' => $field === 'max_salary' ? $query : null,
         ];
 
         $suggestions = Job::with('employer')
-            ->filter($filters) // Apply the filter scope for consistency
+            ->filter($filters)
             ->when($field === 'min_salary' || $field === 'max_salary', function ($queryBuilder) use ($query) {
-                // Override the salary filtering logic for min_salary and max_salary
                 $queryBuilder->where('salary', 'like', '%' . $query . '%');
             })
             ->limit(10)
