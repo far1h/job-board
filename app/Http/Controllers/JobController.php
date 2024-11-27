@@ -14,8 +14,18 @@ class JobController extends Controller
      */
     public function index()
     {
-        $filters = request()->only('search', 'min_salary', 'experience', 'category');
-        return view('job.index', ['jobs' => Job::with('employer')->filter($filters)->get()]);
+        $filters = request()->only(
+            'search',
+            'min_salary',
+            'max_salary',
+            'experience',
+            'category'
+        );
+
+        return view(
+            'job.index',
+            ['jobs' => Job::with('employer')->filter($filters)->get()]
+        );
     }
 
     public function suggestions(Request $request)
@@ -32,15 +42,16 @@ class JobController extends Controller
             return response()->json([]);
         }
 
-        // Use the filter scope for consistent filtering logic
+        // Define filters for the scopeFilter
         $filters = [
             'search' => $field === 'search' ? $query : null,
-            'min_salary' => $field === 'min_salary' ? $query : null,
-            'max_salary' => $field === 'max_salary' ? $query : null,
         ];
 
         $suggestions = Job::with('employer')
             ->filter($filters)
+            ->when($field === 'min_salary' || $field === 'max_salary', function ($queryBuilder) use ($query) {
+                $queryBuilder->where('salary', 'like', '%' . $query . '%');
+            })
             ->limit(10)
             ->get(['id', $field === 'search' ? 'title as text' : 'salary as text']);
 
