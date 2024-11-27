@@ -42,8 +42,6 @@ class JobController extends Controller
             'search',
             'min_salary',
             'max_salary',
-            'experience',
-            'category'
         ])) {
             return response()->json([]);
         }
@@ -56,7 +54,11 @@ class JobController extends Controller
         ];
 
         $suggestions = Job::with('employer')
-            ->filter($filters)
+            ->filter($filters) // Apply the filter scope for consistency
+            ->when($field === 'min_salary' || $field === 'max_salary', function ($queryBuilder) use ($query) {
+                // Override the salary filtering logic for min_salary and max_salary
+                $queryBuilder->where('salary', 'like', '%' . $query . '%');
+            })
             ->limit(10)
             ->get(['id', $field === 'search' ? 'title as text' : 'salary as text']);
 
