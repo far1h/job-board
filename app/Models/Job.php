@@ -23,6 +23,11 @@ class Job extends Model
     {
         return $this->belongsTo(Employer::class);
     }
+
+    public function jobApplications() {
+        return $this->hasMany(JobApplication::class);
+    }
+
     public function scopeFilter($query, array $filters)
     {
         return $query->when($filters['search'] ?? null, function ($query, $search) {
