@@ -13,7 +13,11 @@ class MyJobApplicationController extends Controller
             'my_job_application.index',
             [
                 'applications' => Auth::user()->jobApplications()
-                    ->with('job', 'job.employer')
+                    ->with([
+                        'job' => fn($query) => $query->withCount('jobApplications')
+                            ->withAvg('jobApplications', 'expected_salary'),
+                        'job.employer'
+                    ])
                     ->latest()->get()
             ]
         );
