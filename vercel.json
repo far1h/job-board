@@ -9,6 +9,14 @@
         { "src": "/build/(.*)", "dest": "/public/build/" },
         { "src": "/(.*)", "dest": "/api/index.php" }
     ],
+    "headers": [
+        {
+          "source": "/auth/(.*)",
+          "headers": [
+            { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+          ]
+        }
+    ],
     "public": true,
     "buildCommand": "vite build",
     "outputDirectory": "public",
