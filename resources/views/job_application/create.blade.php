@@ -12,7 +12,7 @@
         <form action="{{ route('job.application.store', $job) }}" method="POST">
             @csrf
             <div class="mb-4">
-                <label for="expected_salary" class="mb-2 block text-sm font-medium text-slate-900">Expected Salary</label>
+                <x-label for="expected_salary" :required="true">Expected Salary</x-label>
                 <x-text-input type="number" name="expected_salary" />
             </div>
             <x-button class="w-full">Apply</x-button>
