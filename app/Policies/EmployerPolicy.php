@@ -29,7 +29,7 @@ class EmployerPolicy
      */
     public function create(User $user): bool
     {
-        return null === $user->employer();
+        return null === $user->employer;
     }
 
     /**
@@ -37,7 +37,7 @@ class EmployerPolicy
      */
     public function update(User $user, Employer $employer): bool
     {
-        return null === $user->employer();
+        return null === $user->employer;
     }
 
     /**
