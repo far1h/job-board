@@ -5,8 +5,8 @@
     use App\Http\Controllers\JobApplicationController;
     use App\Http\Controllers\JobController;
     use App\Http\Controllers\MyJobApplicationController;
-use App\Http\Controllers\MyJobController;
-use App\Models\Job;
+    use App\Http\Controllers\MyJobController;
+    use App\Models\Job;
     use Illuminate\Http\Request;
     use Illuminate\Support\Facades\Route;
 
