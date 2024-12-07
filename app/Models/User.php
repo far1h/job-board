@@ -46,8 +46,9 @@ class User extends Authenticatable
         ];
     }
 
-    public function employer(){
-        $this->hasOne(Employer::class);
+    public function employer()
+    {
+        return $this->hasOne(Employer::class, 'user_id'); // Ensure the foreign key is correctly specified
     }
 
     public function jobApplications() {
