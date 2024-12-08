@@ -18,21 +18,23 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required'
         ]);
+
         $credentials = $request->only('email', 'password');
         $remember = $request->filled('remember');
+
         if (Auth::attempt($credentials, $remember)) {
+            $request->session()->regenerate();
             return redirect()->intended('/');
-        } else {
-            return redirect()->back()
-                ->with('error', 'Invalid credentials');
         }
+
+        return back()->withErrors(['email' => 'Invalid credentials']);
     }
 
-    public function destroy()
+    public function destroy(Request $request)
     {
         Auth::logout();
-        request()->session()->invalidate();
-        request()->session()->regenerateToken();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
         return redirect('/');
     }
 }
