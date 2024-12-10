@@ -35,6 +35,7 @@
         "SESSION_ENCRYPT":"false",
         "SESSION_PATH":"/",
         "SESSION_DOMAIN":"null",
-        "SESSION_SECURE_COOKIE":"true"
+        "SESSION_SECURE_COOKIE":"true",
+        "SESSION_SAME_SITE": "lax"
     }
 }
