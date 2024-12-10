@@ -34,7 +34,7 @@
         "SESSION_LIFETIME":"120",
         "SESSION_ENCRYPT":"false",
         "SESSION_PATH":"/",
-        "SESSION_DOMAIN":"null",
+        "SESSION_DOMAIN":".job-board-wp-project.vercel.app",
         "SESSION_SECURE_COOKIE":"true",
         "SESSION_SAME_SITE": "lax"
     }
