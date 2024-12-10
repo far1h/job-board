@@ -30,8 +30,6 @@
         "DB_PORT": "3307",
         "DB_DATABASE": "jobBoard_tonguesnow",
         "DB_USERNAME": "jobBoard_tonguesnow",
-        "SESSION_SECURE_COOKIE": "true",
-        "SESSION_SAME_SITE": "lax",
-        "SESSION_DRIVER": "cookie"
+        "SESSION_DRIVER": "database"
     }
 }
