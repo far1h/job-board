@@ -39,6 +39,7 @@
         "DB_DATABASE": "jobBoard_tonguesnow",
         "DB_USERNAME": "jobBoard_tonguesnow",
         "SESSION_DRIVER":"database",
+        "SESSION_DOMAIN":".vercel.app",
         "SESSION_SECURE_COOKIE":"true"
     }
 }
