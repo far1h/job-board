@@ -11,27 +11,21 @@
             clearTimeout(this.debounceTimer);
             this.loading = true;
             const currentQuery = this.query;
-
             this.debounceTimer = setTimeout(async () => {
                 try {
                     if (this.activeRequest) {
                         this.activeRequest.abort();
                     }
-
                     const controller = new AbortController();
                     this.activeRequest = controller;
-
                     const response = await fetch(
                         `/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`,
                         { signal: controller.signal }
                     );
-
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
-
                     const data = await response.json();
-
                     // Ensure suggestions are updated only for the latest query
                     if (currentQuery === this.query) {
                         this.suggestions = data;
@@ -51,6 +45,10 @@
         clearInput() {
             this.query = '';
             this.suggestions = [];
+        },
+        selectSuggestion(text) {
+            this.query = text; // Set the input value
+            this.showSuggestions = false; // Hide suggestions
         }
     }"
     @click.away="showSuggestions = false"
@@ -98,12 +96,11 @@
     <div
         x-show="showSuggestions && suggestions.length > 0"
         class="absolute left-0 z-10 mt-1 w-full rounded-md bg-white shadow-lg"
-        style="display: none;"
     >
         <ul>
             <template x-for="suggestion in suggestions" :key="suggestion.id">
                 <li
-                    @click="query = suggestion.text; showSuggestions = false;"
+                    @click="selectSuggestion(suggestion.text)"
                     class="cursor-pointer px-4 py-2 text-sm hover:bg-slate-100"
                 >
                     <span x-text="suggestion.text"></span>
