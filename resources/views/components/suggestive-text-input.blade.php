@@ -5,36 +5,90 @@
         query: '{{ $value ?? '' }}',
         showSuggestions: false,
         loading: false,
+        activeRequest: null,
         debounceTimer: null,
         async fetchSuggestions() {
             clearTimeout(this.debounceTimer);
             this.loading = true;
+            const currentQuery = this.query;
 
             this.debounceTimer = setTimeout(async () => {
                 try {
-                    const response = await fetch(`/suggestions?field={{ $name }}&query=${encodeURIComponent(this.query)}`);
-                    if (!response.ok) throw new Error('Failed to fetch suggestions');
-                    this.suggestions = await response.json();
+                    if (this.activeRequest) {
+                        this.activeRequest.abort();
+                    }
+
+                    const controller = new AbortController();
+                    this.activeRequest = controller;
+
+                    const response = await fetch(
+                        `/suggestions?field={{ $name }}&query=${encodeURIComponent(this.query)}`,
+                        { signal: controller.signal }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch suggestions');
+                    }
+
+                    const data = await response.json();
+
+                    // Ensure suggestions are updated only for the latest query
+                    if (currentQuery === this.query) {
+                        this.suggestions = data;
+                    }
                 } catch (error) {
-                    console.error(error);
+                    if (error.name !== 'AbortError') {
+                        console.error(error);
+                    }
                 } finally {
-                    this.loading = false;
+                    if (currentQuery === this.query) {
+                        this.loading = false;
+                    }
                 }
-            }, 300);
+            }, 300); // Debounce delay
+        },
+        clearInput() {
+            this.query = '';
+            this.suggestions = [];
+            this.showSuggestions = false;
+        },
+        selectSuggestion(text) {
+            this.query = text;
+            this.showSuggestions = false;
         }
     }"
     @click.away="showSuggestions = false"
 >
+    <!-- Input Field -->
     <input
+        x-ref="input-{{ $name }}"
         type="{{ $type }}"
         name="{{ $name }}"
         placeholder="{{ $placeholder }}"
-        value="{{ $value }}"
         x-model="query"
         @input="fetchSuggestions"
         @focus="showSuggestions = true"
-        class="w-full rounded-md border-0 py-1.5 px-2.5 text-sm ring-1 ring-slate-300 placeholder:text-slate-400 focus:ring-2"
+        class="w-full rounded-md border-0 py-1.5 px-2.5 pr-8 text-sm ring-1 ring-slate-300 placeholder:text-slate-400 focus:ring-2"
     />
+
+    <!-- Clear Button -->
+    <button
+        type="button"
+        class="absolute top-0 right-2 flex h-full items-center"
+        @click="clearInput"
+        x-show="query.length > 0"
+    >
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="h-4 w-4 text-slate-500"
+        >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+    </button>
 
     <!-- Loading Spinner -->
     <div
@@ -52,7 +106,7 @@
         <ul>
             <template x-for="suggestion in suggestions" :key="suggestion.id">
                 <li
-                    @click="$refs['input-{{ $name }}'].value = suggestion.text; showSuggestions = false;"
+                    @click="selectSuggestion(suggestion.text)"
                     class="cursor-pointer px-4 py-2 text-sm hover:bg-slate-100"
                 >
                     <span x-text="suggestion.text"></span>
