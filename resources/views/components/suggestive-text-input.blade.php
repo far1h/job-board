@@ -11,21 +11,27 @@
             clearTimeout(this.debounceTimer);
             this.loading = true;
             const currentQuery = this.query;
+
             this.debounceTimer = setTimeout(async () => {
                 try {
                     if (this.activeRequest) {
                         this.activeRequest.abort();
                     }
+
                     const controller = new AbortController();
                     this.activeRequest = controller;
+
                     const response = await fetch(
-                        `/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`,
+                        `${window.location.origin}/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`,
                         { signal: controller.signal }
                     );
+
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
                     }
+
                     const data = await response.json();
+
                     // Ensure suggestions are updated only for the latest query
                     if (currentQuery === this.query) {
                         this.suggestions = data;
@@ -45,10 +51,11 @@
         clearInput() {
             this.query = '';
             this.suggestions = [];
+            this.showSuggestions = false;
         },
         selectSuggestion(text) {
-            this.query = text; // Set the input value
-            this.showSuggestions = false; // Hide suggestions
+            this.query = text; // Update query with the selected suggestion
+            this.showSuggestions = false; // Close suggestions dropdown
         }
     }"
     @click.away="showSuggestions = false"
@@ -69,7 +76,7 @@
     <button
         type="button"
         class="absolute top-0 right-2 flex h-full items-center"
-        @click="clearInput(); $refs['input-{{ $name }}'].focus();"
+        @click="clearInput()"
         x-show="query.length > 0"
     >
         <svg
@@ -96,6 +103,7 @@
     <div
         x-show="showSuggestions && suggestions.length > 0"
         class="absolute left-0 z-10 mt-1 w-full rounded-md bg-white shadow-lg"
+        style="display: none;"
     >
         <ul>
             <template x-for="suggestion in suggestions" :key="suggestion.id">
