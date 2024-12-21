@@ -7,7 +7,7 @@
         loading: false,
         activeRequest: null,
         debounceTimer: null,
-        async fetchSuggestions() {
+        async fetchSuggestions(fieldName) {
             clearTimeout(this.debounceTimer);
             this.loading = true;
             const currentQuery = this.query;
@@ -22,12 +22,12 @@
                     this.activeRequest = controller;
 
                     const response = await fetch(
-                        `/suggestions?field={{ $name }}&query=${encodeURIComponent(this.query)}`,
+                        `/suggestions?field=${fieldName}&query=${encodeURIComponent(this.query)}`,
                         { signal: controller.signal }
                     );
 
                     if (!response.ok) {
-                        throw new Error('Failed to fetch suggestions');
+                        throw new Error('Network response was not ok');
                     }
 
                     const data = await response.json();
@@ -38,9 +38,10 @@
                     }
                 } catch (error) {
                     if (error.name !== 'AbortError') {
-                        console.error(error);
+                        console.error('Error fetching suggestions:', error);
                     }
                 } finally {
+                    // Stop loading spinner for the latest query
                     if (currentQuery === this.query) {
                         this.loading = false;
                     }
@@ -50,11 +51,6 @@
         clearInput() {
             this.query = '';
             this.suggestions = [];
-            this.showSuggestions = false;
-        },
-        selectSuggestion(text) {
-            this.query = text;
-            this.showSuggestions = false;
         }
     }"
     @click.away="showSuggestions = false"
@@ -62,11 +58,11 @@
     <!-- Input Field -->
     <input
         x-ref="input-{{ $name }}"
-        type="{{ $type }}"
-        name="{{ $name }}"
+        type="text"
         placeholder="{{ $placeholder }}"
+        name="{{ $name }}"
         x-model="query"
-        @input="fetchSuggestions"
+        @input="fetchSuggestions('{{ $name }}')"
         @focus="showSuggestions = true"
         class="w-full rounded-md border-0 py-1.5 px-2.5 pr-8 text-sm ring-1 ring-slate-300 placeholder:text-slate-400 focus:ring-2"
     />
@@ -75,7 +71,7 @@
     <button
         type="button"
         class="absolute top-0 right-2 flex h-full items-center"
-        @click="clearInput"
+        @click="clearInput(); $refs['input-{{ $name }}'].focus();"
         x-show="query.length > 0"
     >
         <svg
@@ -102,11 +98,12 @@
     <div
         x-show="showSuggestions && suggestions.length > 0"
         class="absolute left-0 z-10 mt-1 w-full rounded-md bg-white shadow-lg"
+        style="display: none;"
     >
         <ul>
             <template x-for="suggestion in suggestions" :key="suggestion.id">
                 <li
-                    @click="selectSuggestion(suggestion.text)"
+                    @click="query = suggestion.text; showSuggestions = false;"
                     class="cursor-pointer px-4 py-2 text-sm hover:bg-slate-100"
                 >
                     <span x-text="suggestion.text"></span>
