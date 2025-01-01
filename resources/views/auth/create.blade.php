@@ -29,6 +29,7 @@
                 </div>
             </div>
             <x-button class="w-full bg-green-50">Login</x-button>
+            <p>CSRF Token: {{ csrf_token() }}</p>
         </form>
     </x-card>
 </x-layout>
